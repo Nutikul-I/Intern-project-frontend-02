@@ -1,1 +1,1 @@
-# EZY_Clinic_Frontend
+# Template_ReactJS
