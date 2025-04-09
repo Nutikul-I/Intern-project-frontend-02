@@ -54,6 +54,17 @@ const EmployeeComponent = () => {
         setEmployees(employees.filter((emp) => emp.id !== id));
     };
 
+    const handleEdit = (employee) => {
+        setNewEmployee({
+            id: employee.id,
+            name: employee.name,
+            position: employee.position,
+            email: employee.email,
+        });
+        openModal();
+    };
+    
+
     return (
         <div className="container-fluid vh-100 d-flex flex-column bg-light">
             <div className="row flex-grow-1">
@@ -92,7 +103,8 @@ const EmployeeComponent = () => {
                                                             height: "40px",
                                                             boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
                                                             transition: "all 0.3s ease",
-                                                        }}>
+                                                        }}
+                                                        onClick={() => handleEdit(employee)}>
                                                         <FaEdit style={{ width: "70%", height: "70%", color: "#fff" }} />
                                                     </button>
                                                     <button className="btn btn-danger flex-fill d-flex align-items-center justify-content-center p-0"
