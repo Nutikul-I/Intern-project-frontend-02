@@ -4,15 +4,22 @@ import "../assets/css/employee.css";
 import { Button } from "react-bootstrap";
 import { Checkbox } from "@mui/material";
 import { ReactExcel, readFile, generateObjects } from "@ramonak/react-excel";
-
-import { FaEdit, FaTrash, FaUserPlus, FaFileExcel, FaSave } from "react-icons/fa";
+import Pagination from "@mui/material/Pagination";
+import {
+    FaEdit,
+    FaTrash,
+    FaUserPlus,
+    FaFileExcel,
+    FaSave,
+} from "react-icons/fa";
 
 Modal.setAppElement("#root");
-
 
 const EmployeeComponent = () => {
     const [initialData, setInitialData] = useState(undefined);
     const [currentSheet, setCurrentSheet] = useState({});
+    const [currentPage, setCurrentPage] = useState(1); // หน้าปัจจุบัน
+    const rowsPerPage = 10; // จำนวนรายการต่อหน้า
     const [employees, setEmployees] = useState([
         {
             id: "0000001",
@@ -34,6 +41,11 @@ const EmployeeComponent = () => {
         },
     ]);
 
+    const indexOfLastEmployee = currentPage * rowsPerPage;
+    const indexOfFirstEmployee = indexOfLastEmployee - rowsPerPage;
+
+    const currentEmployees = employees.slice(indexOfFirstEmployee, indexOfLastEmployee);
+    
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [showExcelImport, setShowExcelImport] = useState(false);
     const fileInputRef = useRef(null);
@@ -78,7 +90,12 @@ const EmployeeComponent = () => {
     };
 
     const addEmployee = () => {
-        if (!newEmployee.firstName || !newEmployee.lastname || !newEmployee.position || !newEmployee.email) {
+        if (
+            !newEmployee.firstName ||
+            !newEmployee.lastname ||
+            !newEmployee.position ||
+            !newEmployee.email
+        ) {
             alert("กรุณากรอกข้อมูลที่จำเป็นให้ครบถ้วน");
             return;
         }
@@ -141,20 +158,20 @@ const EmployeeComponent = () => {
             position: row["ตำแหน่ง"] || "N/A",
             email: "N/A",
         }));
-    
-        console.log("Mapped Imported Data:", importedData); 
-    
+
+        console.log("Mapped Imported Data:", importedData);
+
         if (!importedData || importedData.length === 0) {
             alert("No data to save. Please check the imported file.");
             return;
         }
-    
+
         // รวมข้อมูลใหม่กับข้อมูลเดิม
         setEmployees((prevEmployees) => [...prevEmployees, ...importedData]);
-    
+
         // ซ่อนการแสดงผล Excel import preview
         setShowExcelImport(false);
-    
+
         alert("Data imported and saved successfully!");
     };
 
@@ -228,7 +245,7 @@ const EmployeeComponent = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {employees.map((employee) => (
+                                    {currentEmployees.map((employee) => (
                                         <tr key={employee.id}>
                                             <td>{employee.id}</td>
                                             <td>{employee.name}</td>
@@ -275,7 +292,14 @@ const EmployeeComponent = () => {
                                         </tr>
                                     ))}
                                 </tbody>
-                            </table>
+                              
+                            </table>  
+                            <Pagination
+                                    count={Math.ceil(employees.length / rowsPerPage)} // จำนวนหน้าทั้งหมด
+                                    page={currentPage} // หน้าปัจจุบัน
+                                    onChange={(event, value) => setCurrentPage(value)} // อัปเดตหน้าปัจจุบัน
+                                    color="primary"
+                                />
                         </div>
                     </div>
                 </div>
