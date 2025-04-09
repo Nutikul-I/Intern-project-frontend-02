@@ -5,6 +5,8 @@ import { Button } from "react-bootstrap";
 import { Checkbox } from "@mui/material";
 import { ReactExcel, readFile, generateObjects } from "@ramonak/react-excel";
 import Pagination from "@mui/material/Pagination";
+import * as XLSX from "xlsx";
+
 import {
     FaEdit,
     FaTrash,
@@ -45,7 +47,7 @@ const EmployeeComponent = () => {
     const indexOfFirstEmployee = indexOfLastEmployee - rowsPerPage;
 
     const currentEmployees = employees.slice(indexOfFirstEmployee, indexOfLastEmployee);
-    
+
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [showExcelImport, setShowExcelImport] = useState(false);
     const fileInputRef = useRef(null);
@@ -151,28 +153,71 @@ const EmployeeComponent = () => {
             .catch((error) => console.error("Error reading file:", error));
     };
 
+    const formatDate = (dateString) => {
+        // ตรวจสอบว่าเป็น serial number หรือไม่
+        if (!isNaN(dateString) && Number(dateString) > 0) {
+            // แปลง serial number เป็นวันที่
+            const excelEpoch = new Date(1899, 11, 30); // Excel เริ่มนับวันที่จาก 30 ธันวาคม 1899
+            const days = Number(dateString);
+            const date = new Date(excelEpoch.getTime() + days * 24 * 60 * 60 * 1000);
+            return date.toISOString().split("T")[0]; // แปลงเป็นรูปแบบ YYYY-MM-DD
+        }
+    
+        // หากไม่ใช่ serial number ให้ลองแปลงเป็นวันที่ปกติ
+        const date = new Date(dateString);
+        if (isNaN(date)) return "N/A"; // หากไม่สามารถแปลงได้ ให้คืนค่า N/A
+        return date.toISOString().split("T")[0]; // แปลงเป็นรูปแบบ YYYY-MM-DD
+    };
     const save = () => {
         const importedData = generateObjects(currentSheet).map((row) => ({
             id: row["รหัสพนักงาน"] || "N/A",
             name: `${row["ชื่อ"] || ""} ${row["นามสกุล"] || ""}`,
+            gender: row["เพศ"] || "N/A",
             position: row["ตำแหน่ง"] || "N/A",
-            email: "N/A",
+            department: row["แผนก"] || "N/A",
+            startDate: row["วันที่เริ่มงาน"] ? formatDate(row["วันที่เริ่มงาน"]) : "N/A",
+            salary: row["เงินเดือน"] || "N/A",
+            email: row["อีเมล"] || "N/A",
         }));
-
+    
         console.log("Mapped Imported Data:", importedData);
-
+    
         if (!importedData || importedData.length === 0) {
             alert("No data to save. Please check the imported file.");
             return;
         }
-
+    
         // รวมข้อมูลใหม่กับข้อมูลเดิม
         setEmployees((prevEmployees) => [...prevEmployees, ...importedData]);
-
+    
         // ซ่อนการแสดงผล Excel import preview
         setShowExcelImport(false);
-
+    
         alert("Data imported and saved successfully!");
+    };
+    const exportData = () => {
+        if (employees.length === 0) {
+            alert("ไม่มีข้อมูลสำหรับการส่งออก");
+            return;
+        }
+    
+        const data = employees.map((emp) => ({
+            "รหัสพนักงาน": emp.id,
+            "ชื่อ": emp.name.split(" ")[0], // แยกชื่อจาก full name
+            "นามสกุล": emp.name.split(" ")[1] || "", // แยกนามสกุลจาก full name
+            "เพศ": emp.gender || "N/A",
+            "ตำแหน่ง": emp.position,
+            "แผนก": emp.department || "N/A",
+            "วันที่เริ่มงาน": emp.startDate || "N/A",
+            "เงินเดือน": emp.salary || "N/A",
+            "อีเมล": emp.email || "N/A", // เพิ่มฟิลด์อีเมล
+        }));
+    
+        const worksheet = XLSX.utils.json_to_sheet(data);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Employees");
+    
+        XLSX.writeFile(workbook, "employees.xlsx");
     };
 
     return (
@@ -186,6 +231,10 @@ const EmployeeComponent = () => {
                                 <Button className="btn btn-primary" onClick={openModal}>
                                     <FaUserPlus className="me-2" /> เพิ่มข้อมูล
                                 </Button>
+                                <Button className="btn btn-success" onClick={exportData}>
+                                    <FaSave className="me-2" /> ส่งออกข้อมูล
+                                </Button>
+
                                 <Button
                                     className="btn btn-secondary"
                                     onClick={() => fileInputRef.current.click()}
@@ -292,14 +341,14 @@ const EmployeeComponent = () => {
                                         </tr>
                                     ))}
                                 </tbody>
-                              
-                            </table>  
+
+                            </table>
                             <Pagination
-                                    count={Math.ceil(employees.length / rowsPerPage)} // จำนวนหน้าทั้งหมด
-                                    page={currentPage} // หน้าปัจจุบัน
-                                    onChange={(event, value) => setCurrentPage(value)} // อัปเดตหน้าปัจจุบัน
-                                    color="primary"
-                                />
+                                count={Math.ceil(employees.length / rowsPerPage)} // จำนวนหน้าทั้งหมด
+                                page={currentPage} // หน้าปัจจุบัน
+                                onChange={(event, value) => setCurrentPage(value)} // อัปเดตหน้าปัจจุบัน
+                                color="primary"
+                            />
                         </div>
                     </div>
                 </div>
