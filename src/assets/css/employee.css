@@ -1,0 +1,169 @@
+/* ตั้งค่าพื้นฐาน */
+body {
+    font-family: "Arial", sans-serif;
+    background-color: #f8f9fa;
+    margin: 0;
+    padding: 0;
+  }
+  
+  /* คอนเทนเนอร์ของฟอร์ม */
+  .form-container {
+    width: 90%;
+    max-width: 1200px;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    margin: 20px auto;
+  }
+  
+  /* หัวข้อหลัก */
+  .form-title {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #0088cc;
+  }
+  .form-subtitle {
+    font-size: 20px;
+    font-weight: regular;
+    margin-bottom: 20px;
+    color: #0088cc;
+  }
+  
+  
+  /* ใช้ CSS Grid เพื่อแบ่งเป็น 3 คอลัมน์ */
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+  
+  /* คอลัมน์แต่ละส่วน */
+  .column {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  /* รูปภาพพนักงาน */
+  .profile-pic {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+  }
+  
+  .profile-pic img {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background-color: #ddd;
+  }
+  
+  /* ปรับแต่งอินพุตและปุ่ม */
+  input, select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+  }
+  
+  input:focus, select:focus {
+    border-color: #0088cc;
+    outline: none;
+  }
+  
+  /* ปุ่ม */
+  .button-group {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+    gap: 10px;
+  }
+  
+  .btn {
+    padding: 10px 20px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    transition: 0.3s;
+  }
+  
+  .btn-cancel {
+    background-color: #ddd;
+  }
+  
+  .btn-submit {
+    background-color: #0088cc;
+    color: white;
+  }
+  
+  .btn:hover {
+    opacity: 0.8;
+  }
+  
+  /* Responsive */
+  @media (max-width: 992px) {
+    .form-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  
+  @media (max-width: 576px) {
+    .form-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* คอลัมน์ */
+.column {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  /* รูปโปรไฟล์ */
+  .profile-pic {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    margin-bottom: 10px;
+  }
+  
+  .profile-pic img {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 2px solid #ddd;
+  }
+  
+  /* อินพุตและ select */
+  .form-control {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+  }
+  
+  .form-control:focus {
+    border-color: #0088cc;
+    outline: none;
+  }
+  
+  label {
+    display: flex;
+    align-items: center;
+    white-space: nowrap; 
+  }
+  .label-input-container {
+    display: grid;
+    grid-template-columns: auto 70%;; /* แบ่งเป็น 2 คอลัมน์เท่ากัน */
+    gap: 5px; /* เพิ่มระยะห่างระหว่างคอลัมน์ */
+    align-items: center; /* จัดให้อยู่กึ่งกลางแนวตั้ง */
+  }
+  
