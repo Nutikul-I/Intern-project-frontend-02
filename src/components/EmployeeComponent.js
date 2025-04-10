@@ -7,7 +7,10 @@ import { ReactExcel, readFile, generateObjects } from "@ramonak/react-excel";
 import Pagination from "@mui/material/Pagination";
 import * as XLSX from "xlsx";
 import { PDFDownloadLink, Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
-
+import { Font } from '@react-pdf/renderer';
+import SarabunRegular from '../assets/font/Sarabun-Regular.ttf';
+import SarabunBold from '../assets/font/Sarabun-Bold.ttf';
+import SarabunLight from '../assets/font/Sarabun-Light.ttf';
 import {
     FaEdit,
     FaTrash,
@@ -15,6 +18,16 @@ import {
     FaFileExcel,
     FaSave,
 } from "react-icons/fa";
+
+// ย้าย Font.register มาที่นี่ หลัง import ทั้งหมด
+Font.register({
+    family: 'Sarabun',
+    fonts: [
+        { src: SarabunRegular, fontWeight: 'normal' },
+        { src: SarabunBold, fontWeight: 'bold' },
+        { src: SarabunLight, fontWeight: 'light' },
+    ],
+});
 
 Modal.setAppElement("#root");
 
@@ -222,81 +235,81 @@ const EmployeeComponent = () => {
         XLSX.writeFile(workbook, "employees.xlsx");
     };
 
+
     const styles = StyleSheet.create({
         page: { padding: 30 },
-        section: { marginBottom: 10 },
+        title: { fontSize: 18, marginBottom: 10, fontFamily: "Sarabun", fontWeight: "bold" },
         table: { display: "table", width: "auto", marginBottom: 10 },
         tableRow: { flexDirection: "row" },
-        tableCol: { width: "25%", border: "1px solid #ccc", padding: 5 },
-        tableCell: { fontSize: 10 },
-        title: { fontSize: 18, marginBottom: 10 },
+        tableCol: { width: "12.5%", border: "1px solid #ccc", padding: 5 },
+        tableCell: { fontSize: 12, fontFamily: "Sarabun" }, // ใช้ฟอนต์ภาษาไทย
     });
 
-   const EmployeePDF = ({ employees }) => (
-    <Document>
-        <Page size="A4" style={styles.page}>
-            <Text style={styles.title}>Employee Report</Text>
-            <View style={styles.table}>
-                {/* Header */}
-                <View style={styles.tableRow}>
-                    <View style={styles.tableCol}>
-                        <Text style={styles.tableCell}>ID</Text>
+    const EmployeePDF = ({ employees }) => (
+        <Document>
+            <Page size="A4" style={styles.page}>
+                <Text style={styles.title}>Employee Report</Text>
+                <View style={styles.table}>
+                    {/* Header */}
+                    <View style={styles.tableRow}>
+                        <View style={styles.tableCol}>
+                            <Text style={styles.tableCell}>ID</Text>
+                        </View>
+                        <View style={styles.tableCol}>
+                            <Text style={styles.tableCell}>Name</Text>
+                        </View>
+                        <View style={styles.tableCol}>
+                            <Text style={styles.tableCell}>Gender</Text>
+                        </View>
+                        <View style={styles.tableCol}>
+                            <Text style={styles.tableCell}>Position</Text>
+                        </View>
+                        <View style={styles.tableCol}>
+                            <Text style={styles.tableCell}>Department</Text>
+                        </View>
+                        <View style={styles.tableCol}>
+                            <Text style={styles.tableCell}>Start Date</Text>
+                        </View>
+                        <View style={styles.tableCol}>
+                            <Text style={styles.tableCell}>Salary</Text>
+                        </View>
+                        <View style={styles.tableCol}>
+                            <Text style={styles.tableCell}>Email</Text>
+                        </View>
                     </View>
-                    <View style={styles.tableCol}>
-                        <Text style={styles.tableCell}>Name</Text>
-                    </View>
-                    <View style={styles.tableCol}>
-                        <Text style={styles.tableCell}>Gender</Text>
-                    </View>
-                    <View style={styles.tableCol}>
-                        <Text style={styles.tableCell}>Position</Text>
-                    </View>
-                    <View style={styles.tableCol}>
-                        <Text style={styles.tableCell}>Department</Text>
-                    </View>
-                    <View style={styles.tableCol}>
-                        <Text style={styles.tableCell}>Start Date</Text>
-                    </View>
-                    <View style={styles.tableCol}>
-                        <Text style={styles.tableCell}>Salary</Text>
-                    </View>
-                    <View style={styles.tableCol}>
-                        <Text style={styles.tableCell}>Email</Text>
-                    </View>
+                    {/* Data */}
+                    {employees.map((emp) => (
+                        <View style={styles.tableRow} key={emp.id}>
+                            <View style={styles.tableCol}>
+                                <Text style={styles.tableCell}>{emp.id}</Text>
+                            </View>
+                            <View style={styles.tableCol}>
+                                <Text style={styles.tableCell}>{emp.name}</Text>
+                            </View>
+                            <View style={styles.tableCol}>
+                                <Text style={styles.tableCell}>{emp.gender || "N/A"}</Text>
+                            </View>
+                            <View style={styles.tableCol}>
+                                <Text style={styles.tableCell}>{emp.position}</Text>
+                            </View>
+                            <View style={styles.tableCol}>
+                                <Text style={styles.tableCell}>{emp.department || "N/A"}</Text>
+                            </View>
+                            <View style={styles.tableCol}>
+                                <Text style={styles.tableCell}>{emp.startDate || "N/A"}</Text>
+                            </View>
+                            <View style={styles.tableCol}>
+                                <Text style={styles.tableCell}>{emp.salary || "N/A"}</Text>
+                            </View>
+                            <View style={styles.tableCol}>
+                                <Text style={styles.tableCell}>{emp.email}</Text>
+                            </View>
+                        </View>
+                    ))}
                 </View>
-                {/* Data */}
-                {employees.map((emp) => (
-                    <View style={styles.tableRow} key={emp.id}>
-                        <View style={styles.tableCol}>
-                            <Text style={styles.tableCell}>{emp.id}</Text>
-                        </View>
-                        <View style={styles.tableCol}>
-                            <Text style={styles.tableCell}>{emp.name}</Text>
-                        </View>
-                        <View style={styles.tableCol}>
-                            <Text style={styles.tableCell}>{emp.gender || "N/A"}</Text>
-                        </View>
-                        <View style={styles.tableCol}>
-                            <Text style={styles.tableCell}>{emp.position}</Text>
-                        </View>
-                        <View style={styles.tableCol}>
-                            <Text style={styles.tableCell}>{emp.department || "N/A"}</Text>
-                        </View>
-                        <View style={styles.tableCol}>
-                            <Text style={styles.tableCell}>{emp.startDate || "N/A"}</Text>
-                        </View>
-                        <View style={styles.tableCol}>
-                            <Text style={styles.tableCell}>{emp.salary || "N/A"}</Text>
-                        </View>
-                        <View style={styles.tableCol}>
-                            <Text style={styles.tableCell}>{emp.email}</Text>
-                        </View>
-                    </View>
-                ))}
-            </View>
-        </Page>
-    </Document>
-);
+            </Page>
+        </Document>
+    );
 
     return (
         <div className="container-fluid vh-100 d-flex flex-column bg-light">
