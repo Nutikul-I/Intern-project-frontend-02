@@ -6,6 +6,7 @@ import { Checkbox } from "@mui/material";
 import { ReactExcel, readFile, generateObjects } from "@ramonak/react-excel";
 import Pagination from "@mui/material/Pagination";
 import * as XLSX from "xlsx";
+import { PDFDownloadLink, Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
 
 import {
     FaEdit,
@@ -51,6 +52,7 @@ const EmployeeComponent = () => {
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [showExcelImport, setShowExcelImport] = useState(false);
     const fileInputRef = useRef(null);
+    const [showExportOptions, setShowExportOptions] = useState(false);
 
     const [newEmployee, setNewEmployee] = useState({
         id: "",
@@ -162,7 +164,7 @@ const EmployeeComponent = () => {
             const date = new Date(excelEpoch.getTime() + days * 24 * 60 * 60 * 1000);
             return date.toISOString().split("T")[0]; // แปลงเป็นรูปแบบ YYYY-MM-DD
         }
-    
+
         // หากไม่ใช่ serial number ให้ลองแปลงเป็นวันที่ปกติ
         const date = new Date(dateString);
         if (isNaN(date)) return "N/A"; // หากไม่สามารถแปลงได้ ให้คืนค่า N/A
@@ -179,20 +181,20 @@ const EmployeeComponent = () => {
             salary: row["เงินเดือน"] || "N/A",
             email: row["อีเมล"] || "N/A",
         }));
-    
+
         console.log("Mapped Imported Data:", importedData);
-    
+
         if (!importedData || importedData.length === 0) {
             alert("No data to save. Please check the imported file.");
             return;
         }
-    
+
         // รวมข้อมูลใหม่กับข้อมูลเดิม
         setEmployees((prevEmployees) => [...prevEmployees, ...importedData]);
-    
+
         // ซ่อนการแสดงผล Excel import preview
         setShowExcelImport(false);
-    
+
         alert("Data imported and saved successfully!");
     };
     const exportData = () => {
@@ -200,7 +202,7 @@ const EmployeeComponent = () => {
             alert("ไม่มีข้อมูลสำหรับการส่งออก");
             return;
         }
-    
+
         const data = employees.map((emp) => ({
             "รหัสพนักงาน": emp.id,
             "ชื่อ": emp.name.split(" ")[0], // แยกชื่อจาก full name
@@ -212,13 +214,89 @@ const EmployeeComponent = () => {
             "เงินเดือน": emp.salary || "N/A",
             "อีเมล": emp.email || "N/A", // เพิ่มฟิลด์อีเมล
         }));
-    
+
         const worksheet = XLSX.utils.json_to_sheet(data);
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, "Employees");
-    
+
         XLSX.writeFile(workbook, "employees.xlsx");
     };
+
+    const styles = StyleSheet.create({
+        page: { padding: 30 },
+        section: { marginBottom: 10 },
+        table: { display: "table", width: "auto", marginBottom: 10 },
+        tableRow: { flexDirection: "row" },
+        tableCol: { width: "25%", border: "1px solid #ccc", padding: 5 },
+        tableCell: { fontSize: 10 },
+        title: { fontSize: 18, marginBottom: 10 },
+    });
+
+   const EmployeePDF = ({ employees }) => (
+    <Document>
+        <Page size="A4" style={styles.page}>
+            <Text style={styles.title}>Employee Report</Text>
+            <View style={styles.table}>
+                {/* Header */}
+                <View style={styles.tableRow}>
+                    <View style={styles.tableCol}>
+                        <Text style={styles.tableCell}>ID</Text>
+                    </View>
+                    <View style={styles.tableCol}>
+                        <Text style={styles.tableCell}>Name</Text>
+                    </View>
+                    <View style={styles.tableCol}>
+                        <Text style={styles.tableCell}>Gender</Text>
+                    </View>
+                    <View style={styles.tableCol}>
+                        <Text style={styles.tableCell}>Position</Text>
+                    </View>
+                    <View style={styles.tableCol}>
+                        <Text style={styles.tableCell}>Department</Text>
+                    </View>
+                    <View style={styles.tableCol}>
+                        <Text style={styles.tableCell}>Start Date</Text>
+                    </View>
+                    <View style={styles.tableCol}>
+                        <Text style={styles.tableCell}>Salary</Text>
+                    </View>
+                    <View style={styles.tableCol}>
+                        <Text style={styles.tableCell}>Email</Text>
+                    </View>
+                </View>
+                {/* Data */}
+                {employees.map((emp) => (
+                    <View style={styles.tableRow} key={emp.id}>
+                        <View style={styles.tableCol}>
+                            <Text style={styles.tableCell}>{emp.id}</Text>
+                        </View>
+                        <View style={styles.tableCol}>
+                            <Text style={styles.tableCell}>{emp.name}</Text>
+                        </View>
+                        <View style={styles.tableCol}>
+                            <Text style={styles.tableCell}>{emp.gender || "N/A"}</Text>
+                        </View>
+                        <View style={styles.tableCol}>
+                            <Text style={styles.tableCell}>{emp.position}</Text>
+                        </View>
+                        <View style={styles.tableCol}>
+                            <Text style={styles.tableCell}>{emp.department || "N/A"}</Text>
+                        </View>
+                        <View style={styles.tableCol}>
+                            <Text style={styles.tableCell}>{emp.startDate || "N/A"}</Text>
+                        </View>
+                        <View style={styles.tableCol}>
+                            <Text style={styles.tableCell}>{emp.salary || "N/A"}</Text>
+                        </View>
+                        <View style={styles.tableCol}>
+                            <Text style={styles.tableCell}>{emp.email}</Text>
+                        </View>
+                    </View>
+                ))}
+            </View>
+        </Page>
+    </Document>
+);
 
     return (
         <div className="container-fluid vh-100 d-flex flex-column bg-light">
@@ -231,9 +309,30 @@ const EmployeeComponent = () => {
                                 <Button className="btn btn-primary" onClick={openModal}>
                                     <FaUserPlus className="me-2" /> เพิ่มข้อมูล
                                 </Button>
-                                <Button className="btn btn-success" onClick={exportData}>
-                                    <FaSave className="me-2" /> ส่งออกข้อมูล
-                                </Button>
+
+                                {/* ปุ่ม Dropdown สำหรับเลือกการส่งออก */}
+                                <div className="btn-group">
+                                    <Button
+                                        className="btn btn-success dropdown-toggle"
+                                        onClick={() => setShowExportOptions(!showExportOptions)}
+                                    >
+                                        <FaSave className="me-2" /> ส่งออกข้อมูล
+                                    </Button>
+                                    {showExportOptions && (
+                                        <div className="dropdown-menu show">
+                                            <button className="dropdown-item" onClick={exportData}>
+                                                ส่งออกเป็น Excel
+                                            </button>
+                                            <PDFDownloadLink
+                                                document={<EmployeePDF employees={employees} />}
+                                                fileName="employees.pdf"
+                                                className="dropdown-item"
+                                            >
+                                                {({ loading }) => (loading ? "กำลังสร้าง PDF..." : "ส่งออกเป็น PDF")}
+                                            </PDFDownloadLink>
+                                        </div>
+                                    )}
+                                </div>
 
                                 <Button
                                     className="btn btn-secondary"
