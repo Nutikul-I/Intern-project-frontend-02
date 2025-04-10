@@ -238,17 +238,21 @@ const EmployeeComponent = () => {
 
     const styles = StyleSheet.create({
         page: { padding: 30 },
-        title: { fontSize: 18, marginBottom: 10, fontFamily: "Sarabun", fontWeight: "bold" },
-        table: { display: "table", width: "auto", marginBottom: 10 },
+        header: { fontSize: 16, marginBottom: 10, fontFamily: "Sarabun", textAlign: "center", fontWeight: "bold" },
+        date: { fontSize: 12, marginBottom: 20, fontFamily: "Sarabun", textAlign: "right" },
+        table: { display: "table", width: "auto", marginBottom: 20 },
         tableRow: { flexDirection: "row" },
-        tableCol: { width: "12.5%", border: "1px solid #ccc", padding: 5 },
-        tableCell: { fontSize: 12, fontFamily: "Sarabun" }, // ใช้ฟอนต์ภาษาไทย
+        tableCol: { width: "12.5%", border: "1px solid black", padding: 5 },
+        tableCell: { fontSize: 10, fontFamily: "Sarabun", textAlign: "center" },
+        summary: { fontSize: 12, marginTop: 20, fontFamily: "Sarabun", textAlign: "left" },
+        signature: { marginTop: 40, fontSize: 12, fontFamily: "Sarabun", textAlign: "left" },
+        footer: { fontSize: 10, marginTop: 20, fontFamily: "Sarabun", textAlign: "center" },
     });
-
     const EmployeePDF = ({ employees }) => (
         <Document>
             <Page size="A4" style={styles.page}>
-                <Text style={styles.title}>Employee Report</Text>
+            <Text style={styles.header}>ข้อมูลพนักงาน</Text>
+            <Text style={styles.date}>วันที่ {new Date().toLocaleDateString("th-TH")}</Text>
                 <View style={styles.table}>
                     {/* Header */}
                     <View style={styles.tableRow}>
@@ -310,7 +314,6 @@ const EmployeeComponent = () => {
             </Page>
         </Document>
     );
-
     return (
         <div className="container-fluid vh-100 d-flex flex-column bg-light">
             <div className="row flex-grow-1">
