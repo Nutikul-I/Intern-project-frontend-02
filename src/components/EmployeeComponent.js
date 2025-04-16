@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Modal from "react-modal";
 import "../assets/css/employee.css";
 import { Button } from "react-bootstrap";
@@ -6,8 +6,10 @@ import { Checkbox } from "@mui/material";
 import { ReactExcel, readFile, generateObjects } from "@ramonak/react-excel";
 import Pagination from "@mui/material/Pagination";
 import * as XLSX from "xlsx";
-import { PDFDownloadLink, Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
+import { PDFDownloadLink, Document, Page, Text, View, StyleSheet, Image } from "@react-pdf/renderer";
 import { Font } from '@react-pdf/renderer';
+
+import QRCode from "qrcode";
 import SarabunRegular from '../assets/font/Sarabun-Regular.ttf';
 import SarabunBold from '../assets/font/Sarabun-Bold.ttf';
 import SarabunLight from '../assets/font/Sarabun-Light.ttf';
@@ -36,6 +38,7 @@ const EmployeeComponent = () => {
     const [currentSheet, setCurrentSheet] = useState({});
     const [currentPage, setCurrentPage] = useState(1); // หน้าปัจจุบัน
     const rowsPerPage = 10; // จำนวนรายการต่อหน้า
+
     const [employees, setEmployees] = useState([
         {
             id: "0000001",
@@ -105,6 +108,19 @@ const EmployeeComponent = () => {
             [name]: type === "checkbox" ? checked : value,
         });
     };
+    const [qrCode, setQrCode] = useState(null);
+    useEffect(() => {
+        const generateQRCode = async () => {
+            try {
+                const qr = await QRCode.toDataURL("เสร็จแล้วจ้า");
+                setQrCode(qr); // เก็บ Base64 ของ QR Code ใน state
+            } catch (err) {
+                console.error("Error generating QR Code:", err);
+            }
+        };
+
+        generateQRCode();
+    }, []); // ทำงานครั้งเดียวเมื่อคอมโพเนนต์โหลด
 
     const addEmployee = () => {
         if (
@@ -235,85 +251,302 @@ const EmployeeComponent = () => {
         XLSX.writeFile(workbook, "employees.xlsx");
     };
 
+    const generateQRCode = async (text) => {
+        try {
+            const qrCode = await QRCode.toDataURL(text);
+            return qrCode;
+        } catch (err) {
+            console.error(err);
+            return null;
+        }
+    };
 
     const styles = StyleSheet.create({
         page: { padding: 30 },
-        header: { fontSize: 16, marginBottom: 10, fontFamily: "Sarabun", textAlign: "center", fontWeight: "bold" },
-        date: { fontSize: 12, marginBottom: 20, fontFamily: "Sarabun", textAlign: "right" },
-        table: { display: "table", width: "auto", marginBottom: 20 },
-        tableRow: { flexDirection: "row" },
-        tableCol: { width: "12.5%", border: "1px solid black", padding: 5 },
+        pageNumberTop: {
+            position: "absolute",
+            top: 10,
+            left: 0,
+            right: 0,
+            textAlign: "center",
+            fontSize: 10,
+            fontFamily: "Sarabun",
+        },
+        headerContainer: {
+            flexDirection: "row", // จัดให้อยู่ในบรรทัดเดียวกัน
+            justifyContent: "space-between", // จัดตำแหน่งให้ซ้าย-ขวา
+            alignItems: "center", // จัดให้อยู่กึ่งกลางแนวตั้ง
+            marginBottom: 20,
+        },
+        headerLeft: {
+            fontSize: 16,
+            fontFamily: "Sarabun",
+            fontWeight: "bold",
+            textAlign: "left"
+        },
+        headerRight: {
+            fontSize: 14,
+            fontFamily: "Sarabun",
+            fontWeight: "light",
+            textAlign: "right"
+        },
+        header: { fontSize: 16, fontFamily: "Sarabun", fontWeight: "bold" },
+        date: { fontSize: 12, fontFamily: "Sarabun" },
+        table: {
+            marginTop: 10,
+            width: '100%',
+            borderWidth: 1,
+            borderStyle: 'solid',
+            borderRightWidth: 0,
+            borderBottomWidth: 0,
+        },
+        tableRow: {
+            flexDirection: 'row',
+        },
+        tableCol: {
+            flex: 1,
+            padding: 4,
+            borderRightWidth: 1,
+            borderBottomWidth: 1,
+            borderStyle: 'solid',
+            textAlign: 'center',
+        },
         tableCell: { fontSize: 10, fontFamily: "Sarabun", textAlign: "center" },
-        summary: { fontSize: 12, marginTop: 20, fontFamily: "Sarabun", textAlign: "left" },
-        signature: { marginTop: 40, fontSize: 12, fontFamily: "Sarabun", textAlign: "left" },
-        footer: { fontSize: 10, marginTop: 20, fontFamily: "Sarabun", textAlign: "center" },
+        footerContainer: {
+            marginTop: 40,
+            textAlign: "left",
+        },
+        summary: {
+            fontSize: 12,
+            fontFamily: "Sarabun",
+            fontWeight: "normal",
+            marginBottom: 10,
+        },
+        signatureContainer: {
+            marginTop: 20,
+        },
+        signatureLine: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginVertical: 4,
+        },
+        line: {
+            flex: 1,
+            borderBottomWidth: 1,
+            marginLeft: 8,
+        },
+        signatureBox: {
+            borderWidth: 1,
+            padding: 20,
+            marginTop: 10,
+            alignItems: 'center',
+        },
+        footerContact: {
+            fontSize: 10,
+            fontFamily: "Sarabun",
+            fontWeight: "normal",
+            textAlign: "center",
+        },
+        finalPageContainer: {
+            marginTop: 50,
+            padding: 20,
+        },
+        finalPageHeader: {
+            fontSize: 16,
+            fontFamily: "Sarabun",
+            fontWeight: "bold",
+            marginBottom: 10,
+        },
+        finalPageText: {
+            fontSize: 12,
+            fontFamily: "Sarabun",
+            marginBottom: 20,
+            lineHeight: 1.5, // เพิ่มระยะห่างระหว่างบรรทัด
+        },
+        qrCode: {
+            width: 100,
+            height: 100,
+            alignSelf: "center",
+            marginTop: 20,
+        },
+
+
     });
-    const EmployeePDF = ({ employees }) => (
-        <Document>
-            <Page size="A4" style={styles.page}>
-            <Text style={styles.header}>ข้อมูลพนักงาน</Text>
-            <Text style={styles.date}>วันที่ {new Date().toLocaleDateString("th-TH")}</Text>
-                <View style={styles.table}>
-                    {/* Header */}
-                    <View style={styles.tableRow}>
-                        <View style={styles.tableCol}>
-                            <Text style={styles.tableCell}>ID</Text>
+
+    const EmployeePDF = ({ employees }) => {
+        const employeesPerPage = 25;
+        const pages = Math.ceil(employees.length / employeesPerPage);
+        const employeeChunks = Array.from({ length: pages }, (_, i) =>
+            employees.slice(i * employeesPerPage, (i + 1) * employeesPerPage)
+        );
+
+        return (
+            <Document>
+                {employeeChunks.map((chunk, pageIndex) => (
+                    <Page size="A4" style={styles.page} key={pageIndex}>
+                        {/* Page Number */}
+                        <Text
+                            style={styles.pageNumberTop}
+                            render={({ pageNumber }) => pageIndex + 1}
+                        />
+
+                        {/* Header */}
+                        <View style={styles.headerContainer}>
+                            <Text style={styles.headerLeft}>ข้อมูลพนักงาน</Text>
+                            <Text style={styles.headerRight}>
+                                {`วันที่ ${new Date().toLocaleDateString("th-TH", {
+                                    day: "numeric",
+                                    month: "long",
+                                    year: "numeric",
+                                })}`}
+                            </Text>
                         </View>
-                        <View style={styles.tableCol}>
-                            <Text style={styles.tableCell}>Name</Text>
+
+                        {/* Table */}
+                        <View style={styles.table}>
+                            {/* Table Header */}
+                            <View style={styles.tableRow}>
+                                <View style={styles.tableCol}>
+                                    <Text style={styles.tableCell}>รหัสพนักงาน</Text>
+                                </View>
+                                <View style={styles.tableCol}>
+                                    <Text style={styles.tableCell}>ชื่อ</Text>
+                                </View>
+                                <View style={styles.tableCol}>
+                                    <Text style={styles.tableCell}>เพศ</Text>
+                                </View>
+                                <View style={styles.tableCol}>
+                                    <Text style={styles.tableCell}>ตำแหน่งง</Text>
+                                </View>
+                                <View style={styles.tableCol}>
+                                    <Text style={styles.tableCell}>แผนก</Text>
+                                </View>
+                                <View style={styles.tableCol}>
+                                    <Text style={styles.tableCell}>วันที่เริ่มงาน</Text>
+                                </View>
+                                <View style={styles.tableCol}>
+                                    <Text style={styles.tableCell}>เงินเดือน</Text>
+                                </View>
+                            </View>
+
+                            {/* Table Data */}
+                            {chunk.map((emp) => (
+                                <View style={styles.tableRow} key={emp.id}>
+                                    <View style={styles.tableCol}>
+                                        <Text style={styles.tableCell}>{emp.id}</Text>
+                                    </View>
+                                    <View style={styles.tableCol}>
+                                        <Text style={styles.tableCell}>{emp.name}</Text>
+                                    </View>
+                                    <View style={styles.tableCol}>
+                                        <Text style={styles.tableCell}>{emp.gender || "N/A"}</Text>
+                                    </View>
+                                    <View style={styles.tableCol}>
+                                        <Text style={styles.tableCell}>{emp.position}</Text>
+                                    </View>
+                                    <View style={styles.tableCol}>
+                                        <Text style={styles.tableCell}>{emp.department || "N/A"}</Text>
+                                    </View>
+                                    <View style={styles.tableCol}>
+                                        <Text style={styles.tableCell}>{emp.startDate || "N/A"}</Text>
+                                    </View>
+                                    <View style={styles.tableCol}>
+                                        <Text style={styles.tableCell}>{emp.salary || "N/A"}</Text>
+                                    </View>
+                                </View>
+                            ))}
                         </View>
-                        <View style={styles.tableCol}>
-                            <Text style={styles.tableCell}>Gender</Text>
-                        </View>
-                        <View style={styles.tableCol}>
-                            <Text style={styles.tableCell}>Position</Text>
-                        </View>
-                        <View style={styles.tableCol}>
-                            <Text style={styles.tableCell}>Department</Text>
-                        </View>
-                        <View style={styles.tableCol}>
-                            <Text style={styles.tableCell}>Start Date</Text>
-                        </View>
-                        <View style={styles.tableCol}>
-                            <Text style={styles.tableCell}>Salary</Text>
-                        </View>
-                        <View style={styles.tableCol}>
-                            <Text style={styles.tableCell}>Email</Text>
-                        </View>
+
+
+
+                        {/* Footer */}
+                        {pageIndex === pages - 1 && (
+                            <View style={styles.footerContainer}>
+                                {/* ข้อมูลพนักงาน */}
+                                <View style={{ marginBottom: 15 }}>
+                                    <Text style={{ fontSize: 14, fontFamily: 'Sarabun', marginBottom: 5 }}>รวมพนักงานทั้งหมด {employees.length} คน</Text>
+                                    <Text style={{ fontSize: 14, fontFamily: 'Sarabun', marginBottom: 5 }}>แบ่งเป็น ชาย {employees.filter(emp => emp.gender === 'ชาย').length} คน หญิง {employees.filter(emp => emp.gender === 'หญิง').length} คน</Text>
+                                </View>
+                                {/* ลายเซ็น */}
+                                <View style={{ marginTop: 30, paddingRight: 40, alignItems: 'flex-end' }}>
+                                    <Text style={{ fontSize: 14, fontFamily: 'Sarabun', marginBottom: 5 }}>
+                                        ลงชื่อ................................................
+                                    </Text>
+                                    <Text style={{ fontSize: 14, fontFamily: 'Sarabun', marginBottom: 5 }}>
+                                        (......................................................)
+                                    </Text>
+                                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                        <Text style={{ fontSize: 14, fontFamily: 'Sarabun', marginRight: 34 }}>ตำแหน่งง</Text>
+                                        <Text style={{ fontSize: 14, fontFamily: 'Sarabun', marginRight: 25 }}>ผู้บันทึกข้อมูล</Text>
+                                    </View>
+                                    <Text style={{ fontSize: 14, fontFamily: 'Sarabun', marginTop: -15 }}>
+                                        ......................................
+                                    </Text>
+                                </View>
+
+                                {/* กรอบลายเซ็น */}
+                                <View style={{ alignItems: 'flex-end', paddingRight: 40 }}>
+                                    <Text style={{ fontSize: 14, fontFamily: 'Sarabun', marginBottom: 5, paddingRight: 100 }}>
+                                        ลายเซ็น
+                                    </Text>
+                                    <View
+                                        style={{
+                                            border: '2px solid #1a2b34',
+                                            padding: 10,
+                                            width: 130,
+                                            height: 50,
+                                            justifyContent: 'center',
+                                            alignItems: 'center',
+                                        }}
+                                    >
+                                        <Image
+                                            src="/signature2.jpg"
+                                            style={{
+                                                width: '80%',
+                                                height: 'auto',
+                                                objectFit: 'contain',
+                                            }}
+                                        />
+                                    </View>
+                                </View>
+
+                                {/* ข้อมูลติดต่อ */}
+                                <Text style={{ marginTop: 20, fontSize: 12, fontFamily: 'Sarabun', }}>
+                                    ติดต่อ โทร. 0999999999
+                                </Text>
+                            </View>
+                        )}
+                    </Page>
+                ))}
+                {/* หน้าสุดท้าย */}
+                <Page size="A4" style={styles.page}>
+                    <Text style={styles.pageNumberTop}>หน้าสุดท้าย</Text>
+                    <View style={styles.finalPageContainer}>
+                        {/* หัวข้อแรก */}
+                        <Text style={styles.finalPageHeader}>What is Lorem Ipsum?</Text>
+                        <Text style={styles.finalPageText}>
+                            Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
+                        </Text>
+
+                        {/* หัวข้อที่สอง */}
+                        <Text style={styles.finalPageHeader}>Where does it come from?</Text>
+                        <Text style={styles.finalPageText}>
+                            Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney College in Virginia, looked up one of the more obscure Latin words, consectetur, from a Lorem Ipsum passage, and going through the cites of the word in classical literature, discovered the undoubtable source. Lorem Ipsum comes from sections 1.10.32 and 1.10.33 of "de Finibus Bonorum et Malorum" (The Extremes of Good and Evil) by Cicero, written in 45 BC. This book is a treatise on the theory of ethics, very popular during the Renaissance. The first line of Lorem Ipsum, "Lorem ipsum dolor sit amet..", comes from a line in section 1.10.32.
+                        </Text>
+
+                        {/* QR Code */}
+                        {qrCode && (
+                            <Image
+                                style={ {width: 50, height: 50, alignSelf: "flex-end", marginTop: 20} }
+                                src={qrCode} // ใช้ Base64 ของ QR Code จาก useState
+                            />
+                        )}
                     </View>
-                    {/* Data */}
-                    {employees.map((emp) => (
-                        <View style={styles.tableRow} key={emp.id}>
-                            <View style={styles.tableCol}>
-                                <Text style={styles.tableCell}>{emp.id}</Text>
-                            </View>
-                            <View style={styles.tableCol}>
-                                <Text style={styles.tableCell}>{emp.name}</Text>
-                            </View>
-                            <View style={styles.tableCol}>
-                                <Text style={styles.tableCell}>{emp.gender || "N/A"}</Text>
-                            </View>
-                            <View style={styles.tableCol}>
-                                <Text style={styles.tableCell}>{emp.position}</Text>
-                            </View>
-                            <View style={styles.tableCol}>
-                                <Text style={styles.tableCell}>{emp.department || "N/A"}</Text>
-                            </View>
-                            <View style={styles.tableCol}>
-                                <Text style={styles.tableCell}>{emp.startDate || "N/A"}</Text>
-                            </View>
-                            <View style={styles.tableCol}>
-                                <Text style={styles.tableCell}>{emp.salary || "N/A"}</Text>
-                            </View>
-                            <View style={styles.tableCol}>
-                                <Text style={styles.tableCell}>{emp.email}</Text>
-                            </View>
-                        </View>
-                    ))}
-                </View>
-            </Page>
-        </Document>
-    );
+                </Page>
+            </Document>
+        );
+    };
     return (
         <div className="container-fluid vh-100 d-flex flex-column bg-light">
             <div className="row flex-grow-1">
